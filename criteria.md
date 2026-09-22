@@ -26,6 +26,7 @@ contains the answer.
 <!-- e.g. "One of my questions is about a topic only two documents mention, so
      I expect that one to be hard." -->
 
+Although most of my documents focus on a single advice topic, some topics overlap with multiple threads. So a similar chunk could sometimes rank above the chunk with the correct answer. 
 ---
 
 ## 2. Every answer names a source
@@ -36,6 +37,7 @@ Every answer the system produces names at least one source document.
 <!-- Why all five and not four? What about your setup makes that achievable —
      or what would have to go wrong for it not to be? -->
 
+Every answer is generated from chunks that have their source documents, so every answer should be able to name at least one source. If this fails, it would be due to another issue like formatting, rather than the search failing. 
 ---
 
 ## 3. The relevance gate stops out-of-corpus questions
@@ -53,6 +55,8 @@ in at least 4 of 5 tries.
 <!-- What did your distances look like when you set the cutoff in Milestone 4?
      Was there a clean gap, or did the two groups overlap? -->
 
+This is pretty straightforward. The relevance gate should stop any irrelevant questions.
+
 ---
 
 ## 4. Something about your chunks
@@ -69,10 +73,11 @@ in at least 4 of 5 tries.
        - "No chunk is shorter than 200 characters, since anything below that
           in my corpus turned out to be a heading with no content under it." -->
 
-
+At least 8 of 10 chunks contain a complete thread reply without having any cutoff sentences.
 
 **Why this target:**
 
+Most replies in advice_threads are short and contain one piece of advice, so a useful chunk should keep that advice instead of splitting it into multiple chunks. I chose 8 of 10 because chunk boundaries can sometimes fall inside a reply even if the overall chunk size is appropriate.
 
 
 ---
@@ -88,10 +93,11 @@ in at least 4 of 5 tries.
      outcome. -->
 
 
+For at least 4 of 5 test questions, every claim in the answer is supported by at least one of the retrieved chunks.
 
 **Why this target:**
 
-
+The advice_threads corpus has many specific details like credits, costs, and deadlines, so I want to make sure the system is using actual information rather than its own facts. I chose 4 of 5 because some advice might be subjective and harder to give a factual claim.
 
 ---
 
