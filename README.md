@@ -1,6 +1,7 @@
 # The Unofficial Guide
 
 <!-- Replace this line with your name and which corpus you picked. -->
+Muhib Sheikh - advice_threads
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -27,10 +28,12 @@
 
      Milestone 5. -->
 
+This project builds a RAG system using my selected advice_threads corpus, which answers common questions students might have such as what type of laptop to get, how to find internships, what to do if you have roommate issues, and who to contact if you get sick and miss an assignment. The system gets relevant parts or chunks of the corpus based on a user's question and uses them to generate a short answer while naming the sources it used. If the question is not covered by the corpus, the system declines to answer.
+
 ## Chunking Strategy
 
-**Chunk size:550**
-**Overlap:100**
+**Chunk size: 550 characters**
+**Overlap: 100 characters**
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -130,9 +133,6 @@ Office hours are dramatically more effective than email for anything that takes 
 
 --- reply 3 (15 votes) ---
 Empty office hours is the biggest unused resource here and I say that having wasted a year not going.
-
-For each one, ask: could someone answer a question using only this,
-without reading what came before or after?
 ```
 
 ## Sample Answer
@@ -141,13 +141,19 @@ without reading what came before or after?
      visible. Milestone 4. -->
 
 **Question:**
+How much RAM is recommended in a laptop for CS students?
 
 **Answer:**
 
 ```
+(best distance 0.224, cutoff 0.6)
+
+Based on the discussion, 16GB of RAM is recommended for CS students (thread_laptop_specs.txt).
+
+Sources retrieved: thread_first_gen.txt, thread_laptop_specs.txt, thread_pass_fail.txt
 ```
 
-**My relevance cutoff:**
+**My relevance cutoff: 0.6**
 
 <!-- The number you set in config.py, and how you got there.
 
@@ -158,8 +164,20 @@ without reading what came before or after?
 
      Milestone 4. -->
 
+I am sticking with a cutoff of 0.6 after looking at the distances for each question. This is because it allowed all my in scope questions and denied all the out of scope questions. I prefer keeping the cutoff closer to the corpus group because I would rather be conservative and reject a questionable answer than allow an irrelevant question and give an irrelevant answer. 
+
 | Question | In corpus? | Best distance |
 |---|---|---|
+| How much RAM is recommended in a laptop for CS students? | Yes | 0.2237 |
+| What should a student do if there is a roommate issue? | Yes | 0.3468 |
+| If I missed the fall cycle for summer internships, are there any other opportunities? | Yes | 0.3312 |
+| What should I do if my commute is one hour? | Yes | 0.4509 |
+| Who should I talk to if I got sick and need to submit homework late? | Yes | 0.5610 |
+| What is the capital of Mongolia? | No | 0.9463 |
+| How do I write a for loop in Rust? | No | 0.8712 |
+| How do I change the oil in a diesel engine? | No | 0.8283 |
+| Who won the 1994 World Cup? | No | 0.9517 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.8122 |
 |  |  |  |
 
 ## How I Used AI
@@ -174,8 +192,10 @@ without reading what came before or after?
      Milestone 5. -->
 
 **1.**
+I used ChatGPT to help me understand and refine my acceptance criteria. It helped me think through what each one was measuring, and making sure there wasn't too much overlap. Based on its feedback, I made some adjustments to improve the criteria. 
 
 **2.**
+I asked ChatGPT to help me understand the effect of chunk sizes and overlap on retrieval. It allowed me to better identify if a chunk was too small and missing context or too large and including irrelevant info. After some trial and error I landed on a chunk size of 550 characters and an overlap of 100 characters. 
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
