@@ -45,7 +45,7 @@ This project builds a RAG system using my selected advice_threads corpus, which 
 
      Milestone 3. -->
 
-I picked a chunk size of 550 characters because the advice_threads corpus has mostly short threads. The starter's 800 character size basically had one document per chunk, which included multiple pieces of different advice. After some trial and error, I found 550 to be a good middle ground where more short relevant threads stayed together but longer threads were split. I initially tried smaller chunk sizes, but some of the chunks lost much of the context or didn't make sense on their own.
+I picked a chunk size of 550 characters because the advice_threads corpus has mostly short threads. The starter's 800 character size basically had one document per chunk, which included multiple pieces of different advice. After some trial and error, I found 550 to be a good middle ground where short relevant replies usually stayed together but longer threads were split into more focused chunks. I initially tried smaller chunk sizes, but some of the chunks lost much of the context or didn't make sense on their own.
 
 I chose 100 characters for the overlap because it helps keep context if some advice crosses a chunk boundary. I also added a minimum character count of 175 per chunk. Without it, some leftover chunks were too small to make sense. 
 
@@ -178,7 +178,6 @@ I am sticking with a cutoff of 0.6 after looking at the distances for each quest
 | How do I change the oil in a diesel engine? | No | 0.8283 |
 | Who won the 1994 World Cup? | No | 0.9517 |
 | What is the recommended dosage of ibuprofen for a headache? | No | 0.8122 |
-|  |  |  |
 
 ## How I Used AI
 
@@ -192,10 +191,10 @@ I am sticking with a cutoff of 0.6 after looking at the distances for each quest
      Milestone 5. -->
 
 **1.**
-I used ChatGPT to help me understand and refine my acceptance criteria. It helped me think through what each one was measuring, and making sure there wasn't too much overlap. Based on its feedback, I made some adjustments to improve the criteria. 
+I used ChatGPT to review my acceptance criteria. It helped me think through what each one was measuring, and making sure there wasn't too much overlap. It pointed out that one of my criteria was similar to another, so I adjusted one to make sure they tested different areas of the system. Specifically, I changed criteria 5 from being similar to criteria 2 to check if answers were actually supported by the sourced chunks.
 
 **2.**
-I asked ChatGPT to help me understand the effect of chunk sizes and overlap on retrieval. It allowed me to better identify if a chunk was too small and missing context or too large and including irrelevant info. After some trial and error I landed on a chunk size of 550 characters and an overlap of 100 characters. 
+I asked ChatGPT to help me understand the effect of chunk sizes and overlap on retrieval. It allowed me to better identify if a chunk was too small and missing context or too large and including irrelevant info. Afterwards, I did some trial and error and eventually landed on a chunk size of 550 characters and an overlap of 100 characters, with an minimum chunk size of 175 characters. 
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never

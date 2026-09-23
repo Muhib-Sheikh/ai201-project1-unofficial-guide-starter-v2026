@@ -55,7 +55,7 @@ in at least 4 of 5 tries.
 <!-- What did your distances look like when you set the cutoff in Milestone 4?
      Was there a clean gap, or did the two groups overlap? -->
 
-This is pretty straightforward. The relevance gate should stop any irrelevant questions.
+My out of scope questions had best distances between 0.81 and 0.95, and my in scope questions ranged from 0.2 to 0.56. Due to this clear gap, I expect my relevance cutoff of 0.6 to reject at least 4 of 5 unrelated questions.
 
 ---
 
