@@ -82,7 +82,8 @@ def fallback_split(
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Update Unit 2 Milestone 4
+    Split documents into chunks but now keeps complete paragraphs until the the chunk is around the chunk_size.
 
     Right now it just calls the fallback. That is the plain, generic behaviour
     the brief is talking about.
@@ -99,40 +100,47 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
     """
 
     chunk_size = 550
-    min_chunk_size = 175
-    overlap = 100
-
-
-    if overlap >= chunk_size:
-        raise ValueError("overlap has to be smaller than chunk_size")
-
     chunks: list[Chunk] = []
+
     for doc in documents:
-        start = 0
+        # replies are separated by empty lines.
+        paragraphs = [paragraph.strip() for paragraph in doc.text.split("\n\n") if paragraph.strip()]
+
+        current_parts: list[str] = []
         index = 0
-        while start < len(doc.text):
-            piece = doc.text[start : start + chunk_size].strip()
-            if piece:
 
-                if len(piece) < min_chunk_size and chunks:
-                    previous_start = start - (chunk_size - overlap)
-                    chunks[-1].text = doc.text[previous_start:].strip()
-                    break
+        for paragraph in paragraphs:
+            candidate = "\n\n".join(current_parts + [paragraph])
 
+            # If adding this paragraph would make the chunk too large, save the current chunk first.
+            if current_parts and len(candidate) > chunk_size:
                 chunks.append(
                     Chunk(
-                        text=piece,
+                        text="\n\n".join(current_parts),
                         source=doc.source,
                         index=index,
                         produced_by="chunker.py::split_documents",
                     )
                 )
+
                 index += 1
-            start += chunk_size - overlap
+                current_parts = [paragraph]
+
+            else:
+                current_parts.append(paragraph)
+
+        # Add anything left over at the end.
+        if current_parts:
+            chunks.append(
+                Chunk(
+                    text="\n\n".join(current_parts),
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
 
     return chunks
-
-    return fallback_split(documents)
 
 
 def describe(chunks: list[Chunk]) -> str:
