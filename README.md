@@ -196,6 +196,9 @@ I used ChatGPT to review my acceptance criteria. It helped me think through what
 **2.**
 I asked ChatGPT to help me understand the effect of chunk sizes and overlap on retrieval. It allowed me to better identify if a chunk was too small and missing context or too large and including irrelevant info. Afterwards, I did some trial and error and eventually landed on a chunk size of 550 characters and an overlap of 100 characters, with an minimum chunk size of 175 characters. 
 
+**3.**
+I used an LLM to help me figure out why Criterion 4 failed and how I could improve it. I already knew the chunking stage was the issue, so I gave it my test output and my old implementation. We discussed what was causing the replies to get cut off and a few possible ways to fix it. Based on that discussion, I updated chunker.py with a new chunking strategy that keeps complete replies together.
+
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
@@ -370,19 +373,33 @@ If your commute is one hour, you should stack your courses so that three long da
 
      Milestone 3. -->
 
+## Diagnoses
+
+## Diagnoses
+
+Criterion 4 was the only one I missed. The issue came from the chunking stage. My chunker uses a chunk size of 550 characters with a 100 character overlap, so sometimes a thread reply gets cut off in the middle when it reaches the chunk limit. In the 10 chunks I checked, chunks 1 and 4 ended in the middle of a reply, while chunks 8 and 10 started in the middle of one.
+
+The 100-character overlap helps keep some context between chunks, but it does not stop a reply from being split. Because of that, only 6 of the 10 chunks had complete replies instead of the 8 out of 10 I was aiming for.
+
+The other four criteria all passed, with most of them getting 5 out of 5 in every run. Looking back, some of my targets may have been a little too safe since the system passed them consistently. Criterion 4 was the one that showed the clearest problem with my current setup.
+
 ## The Improvement
 
 **What I changed:**
+
+I changed my chunking strategy so that it groups complete replies together instead of cutting the text at exactly 550 characters with a 100-character overlap. I still use 550 characters as a general target, but now the chunker tries to keep each reply together instead of cutting it in the middle.
 
 **Why I picked it:**
 
 <!-- Connect it to a specific diagnosis above in one sentence. If you can't,
      you picked a fix because it sounded impressive. -->
 
+I picked this change because my diagnosis showed that the old chunking strategy was cutting some replies in the middle. Since Criterion 4 was specifically checking for complete replies, changing how the chunks are split seemed like the most direct way to fix the problem.
+
 ### Run Log — After
 
 <!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
+     `python run_eval.py --label after` 
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
@@ -391,6 +408,105 @@ If your commute is one hour, you should stack your courses so that three long da
 | 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
 | 4. | | | | | |
 | 5. | | | | | |
+-->
+
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+|---|---|---|---|---|---|
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks contain a complete reply without having any cutoff sentences. | 8 of 10 | 10/10 | 10/10 | 10/10 | MET |
+| 5. Each claim in the answer is supported by at least one of the retrieved chunks. | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+### Criterion 1 — Retrieved chunks contain the answer
+
+File: `results/run_2026-10-05_1745_after`  
+Produced by: `run_eval.py::main`  
+Retrieval: `store.py::search`
+
+```text
+How much RAM is recommended in a laptop for CS students? — run 1
+
+Best distance: 0.2237 (passed the gate)
+Sources retrieved: thread_first_gen.txt, thread_laptop_specs.txt, thread_pass_fail.txt
+
+A laptop with 16GB of RAM is recommended for CS students, as noted by multiple commenters in `thread_laptop_specs.txt`.
+```
+
+### Criterion 2 — Every answer names a source
+
+File: `results/run_2026-10-05_1745_after`  
+Produced by: `run_eval.py::main`
+
+```text
+Who should I talk to if I got sick and need to submit homework late? — run 1
+
+Best distance: 0.5610 (passed the gate)
+Sources retrieved: thread_group_project.txt, thread_late_work.txt, thread_office_hours_etiquette.txt
+
+According to *thread_late_work.txt*, documented illness goes through the dean of students rather than the instructor.
+```
+
+### Criterion 3 — Gate stops out-of-corpus questions
+
+File: `results/run_2026-10-05_1745_after`  
+Produced by: `run_eval.py::check_out_of_scope`
+
+```text
+What is the capital of Mongolia? | 0.939 | refused
+How do I change the oil in a diesel engine? | 0.876 | refused
+Who won the 1994 World Cup? | 0.952 | refused
+What is the recommended dosage of ibuprofen for a headache? | 0.782 | refused
+How do I write a for loop in Rust? | 0.871 | refused
+```
+
+### Criterion 4 — Chunks contain complete replies without cutoff sentences
+
+Displayed by: `app.py chunks -n 10`  
+Produced by: `chunker.py::split_documents`
+
+```text
+Chunk 1  |  source: thread_bike_commute.txt#0  |  produced by: chunker.py::split_documents
+
+THREAD: Is a bike worth it for a 20 minute walk commute?
+
+--- reply 1 (14 votes) ---
+Yeah. Cuts an 18 minute walk to about 6. The thing nobody mentions is storage — covered bike parking exists at three buildings and is full by 9am at all three.
+
+--- reply 2 (9 votes) ---
+Counterpoint, I sold mine. Between November and March the paths are either icy or salted and salt destroys a drivetrain in one season.
+```
+
+```text
+Chunk 9  |  source: thread_roommate_conflict.txt#1  |  produced by: chunker.py::split_documents
+
+--- reply 3 (33 votes) ---
+Write down specifics before the meeting. 'It's not working' is hard to act on; 'guests four nights a week past 2am' is not.
+```
+
+```text
+Chunk 10  |  source: thread_study_spots.txt#1  |  produced by: chunker.py::split_documents
+
+--- reply 4 (9 votes) ---
+The group study rooms in the library can be booked by one person and used alone. Nobody checks.
+```
+
+Result: 10 of 10 sampled chunks contained complete replies without cutoff sentences.
+
+### Criterion 5 — Each claim in the answer is supported by a retrieved chunk
+
+File: `results/run_2026-10-05_1745_after`  
+Produced by: `run_eval.py::main`  
+Retrieval: `store.py::search`
+
+```text
+What should I do if my commute is one hour? — run 1
+
+Best distance: 0.4251 (passed the gate)
+Sources retrieved: thread_bike_commute.txt, thread_commuting.txt
+
+Based on the provided documents, if your commute is one hour, you should stack your courses so that three long days beat five short ones (`thread_commuting.txt`). Additionally, you can rent a locker in the student centre commuter lounge for $20 a year, watch the evening bus timetable before registering for classes that end after 6 pm, and treat your train ride as study time rather than dead time (`thread_commuting.txt`).
+```
 
 **Did it help?**
 
@@ -400,6 +516,8 @@ If your commute is one hour, you should stack your courses so that three long da
      tell.
 
      Milestone 4. -->
+
+Yes. Criterion 4 went from 6 out of 10 before the change to 10 out of 10 after, so it went from MISSED to MET. The other four criteria still passed, so the new chunking strategy fixed the cutoff issue without creating any new problems.
 
 ## What's Still Broken
 
@@ -411,9 +529,13 @@ If your commute is one hour, you should stack your courses so that three long da
 
      Milestone 5. -->
 
+ only had one criterion that failed, and I was able to fix it. There are still other areas I could improve, like adding the original thread question to each chunk so the replies have more context. I stopped here because I fixed the missed criterion without causing any of the other criteria to get worse.
+
 ## What I'd Do Differently
 
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?
 
      Milestone 5. -->
+
+I would probably make Criterion 4 a little stricter, such as checking whether each chunk has enough context to make sense on its own. I still think it was a solid criterion, but the other criteria ended up being pretty straightforward for my system to pass. If I wrote them again, I would either require 5 out of 5 for more of them or make some of the individual criteria harder, especially Criteria 1 and 5.
