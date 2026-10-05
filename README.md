@@ -223,15 +223,113 @@ I asked ChatGPT to help me understand the effect of chunk sizes and overlap on r
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks contain a complete reply without having any cutoff sentences. | 8 of 10 | 6/10 | 6/10 | 6/10 | MISSED |
+| 5. Each claim in the answer is supported by at least one of the retrieved chunks. | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+
+### Criterion 1 — Retrieved chunks contain the answer
+
+File: `results/run_2026-09-23_2129_before`  
+Produced by: `run_eval.py::main`  
+Retrieval: `store.py::search`
+
+```text
+How much RAM is recommended in a laptop for CS students? — run 1
+
+Best distance: 0.2237 (passed the gate)
+Sources retrieved: thread_first_gen.txt, thread_laptop_specs.txt, thread_pass_fail.txt
+
+According to the documents, 16GB of RAM is recommended.
+
+Source: `thread_laptop_specs.txt`
+```
+
+### Criterion 2 — Every answer names a source
+
+File: `results/run_2026-09-23_2129_before`  
+Produced by: `run_eval.py::main`
+
+```text
+Who should I talk to if I got sick and need to submit homework late? — run 1
+
+Best distance: 0.5610 (passed the gate)
+Sources retrieved: thread_group_project.txt, thread_late_work.txt, thread_office_hours_etiquette.txt
+
+According to `thread_late_work.txt`, documented illness goes through the dean of students rather than the instructor.
+```
+
+### Criterion 3 — Gate stops out-of-corpus questions
+
+File: `results/run_2026-09-23_2129_before`  
+Produced by: `run_eval.py::check_out_of_scope`
+
+```text
+What is the capital of Mongolia? | 0.946 | refused
+How do I change the oil in a diesel engine? | 0.828 | refused
+Who won the 1994 World Cup? | 0.952 | refused
+What is the recommended dosage of ibuprofen for a headache? | 0.812 | refused
+How do I write a for loop in Rust? | 0.871 | refused
+```
+
+### Criterion 4 — Chunks contain a complete reply without cutoff sentences
+
+Displayed by: `app.py chunks -n 10`  
+Produced by: `chunker.py::split_documents`
+
+```text
+Chunk 1  |  source: thread_bike_commute.txt#0  |  produced by: chunker.py::split_documents
+
+--- reply 3 (22 votes) ---
+Both true. I keep a cheap bike for September to November and walk the rest of the year. Total cost was about $120 f
+```
+
+```text
+Chunk 4  |  source: thread_first_year_regret.txt#0  |  produced by: chunker.py::split_documents
+
+--- reply 4 (52 votes) ---
+Honestly: that nob
+```
+
+```text
+Chunk 8  |  source: thread_meal_plan_tier.txt#1  |  produced by: chunker.py::split_documents
+
+you can only change it once and only in the first ten days. I waited and got stuck on a plan I didn't use.
+
+--- reply 4 (7 votes) ---
+Declining balance rolls within the semester but not between them. Spend it in December or lose it.
+```
+
+```text
+Chunk 10  |  source: thread_pass_fail.txt#1  |  produced by: chunker.py::split_documents
+
+me want a letter grade for prerequisites and a P doesn't satisfy it.
+
+--- reply 4 (12 votes) ---
+Two per year and eight across the degree. I hit the annual limit in second year and regretted spending one on an easy course.
+```
+
+Result: 6 of 10 sampled chunks contained complete replies without cutoff sentences.
+
+### Criterion 5 — Each claim in the answer is supported by a retrieved chunk
+
+File: `results/run_2026-09-23_2129_before`  
+Produced by: `run_eval.py::main`  
+Retrieval: `store.py::search`
+
+```text
+What should I do if my commute is one hour? — run 1
+
+Best distance: 0.4509 (passed the gate)
+Sources retrieved: thread_bike_commute.txt, thread_commuting.txt, thread_sleep_schedule.txt
+
+If your commute is one hour, you should stack your courses so that three long days beat five short ones. Additionally, you can rent a locker in the student centre commuter lounge for $20 a year, check the evening bus timetable before registering for classes that end after 6pm, and treat the train as study time instead of dead time (thread_commuting.txt).
+```
 
 ## Verdicts
 
