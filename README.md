@@ -344,11 +344,11 @@ If your commute is one hour, you should stack your courses so that three long da
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunks contain the answer | MET | All five test questions had a chunk with the answer in every run, so this was above my target of 4 out of 5. |
+| 2 | Every answer names a source | MET | All five answers named at least one source document in all three runs, so this met my target. |
+| 3 | The relevance gate stops out-of-corpus questions | MET | The relevance gate refused all five out-of-scope questions, so this was above my target of 4 out of 5. |
+| 4 | Chunks contain a complete thread reply without cutoff sentences | MISSED | Only 6 of the 10 sampled chunks had complete replies without cutoff sentences, which was below my target of 8 out of 10. |
+| 5 | Each claim in the answer is supported by at least one retrieved chunk | MET | All five test answers had their claims supported by the retrieved chunks in all three runs, so this was above my target of 4 out of 5. |
 
 ## Diagnoses
 
